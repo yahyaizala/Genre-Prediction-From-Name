@@ -1,0 +1,17 @@
+yahya,e
+zeynep,k
+ali,e
+feyyaz,e
+feyza,k
+sıla,k
+selim,e
+selçuk,e
+hazan,k
+şeyma,k
+şule,k
+müge,k
+ahmet,e
+hasan,e
+cihat,e
+simge,k
+selma,k
