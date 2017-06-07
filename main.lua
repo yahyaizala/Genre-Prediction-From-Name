@@ -2,6 +2,7 @@ local features={}
 local X_train={}
 local y={}
 priori={}
+local M={}
 local bgCompanent
 local bgGrp
 local bg
@@ -10,6 +11,7 @@ local labels
 local ngroup
 local saveScreenOpened=false
 local widget=require "widget"
+widget.setTheme( "widget_theme_ios7" )
 local isVowel=function(char)
 	local vowels={"a","e","i","ı","o","ö","u","ü"}
 	for i=1,#vowels do
@@ -33,6 +35,7 @@ local loadDataFromDB=function()
 
 	end
 
+
 end
 
 local createTable=function()
@@ -40,7 +43,7 @@ local createTable=function()
 	local db=sql.open(system.pathForFile("mjnius.db",system.DocumentsDirectory))
 	local tbl=[[CREATE TABLE IF NOT EXISTS names(id INTEGER PRIMARY KEY,name TEXT,genre TEXT);]]
 	db:exec(tbl)
-	local M={
+	M={
 	{name="yahya",genre="e"},
 	{name="zeynep",genre="k"},
 	{name="ali",genre="e"},
@@ -62,14 +65,13 @@ local createTable=function()
 	for k in db:nrows("SELECT id FROM names") do
 		count=count+1
 	end
-	print(count)
 	if count<1 then		
 		for k=1,#M do
 			local str=[[INSERT INTO names VALUES(NULL,']]..M[k].name..[[',']]..M[k].genre..[[');]]
 			db:exec(str)
 
 		end
-		timer.performWithDelay(1000,loadDataFromDB,1)
+		features=M
 	else
 		loadDataFromDB()
 
@@ -125,6 +127,10 @@ end
 end]]--
 
 local getFeatures=function()
+	if features==nil or #features<1 then
+		timer.performWithDelay(1000,getFeatures,1)
+
+	end
 	for k,feature in pairs(features) do
 		local name=feature.name
 		local genre=feature.genre
@@ -329,6 +335,7 @@ local newTrain=function(e)
 			if cinsiyet=="" then 
 				native.showAlert("MJnuis Uyarı!","Cinsiyet Belirleyiniz!",{"Tamam"})
 			else
+				ngroup.y=-400
 				local insert=[[INSERT INTO names VALUES(NULL,']]..name..[[',']]..cinsiyet..[[');]]
 				local db=openDb()
 				db:exec(insert)
@@ -364,20 +371,24 @@ local newTrain=function(e)
 					i=i+1
 				end		
 				local hideSavedNames=function(e)
+					if e.numTaps<2 then return true end
 					if lst~=nil then
 						transition.to(lst,{time=400,alpha=0,onComplete=function() 
 							display.remove(lst)
 							lst=nil
 							display.remove(bs)
 							bs=nil
+							ngroup.y=display.contentCenterY
 							end})
 					end
+					return true
 
 				end		
 				bs:addEventListener("tap",hideSavedNames)
 				lst:insert(sv)
 				lst.x=display.contentCenterX-lst.width/2
 				lst.y=display.contentCenterY-lst.height/2
+				bs:toFront()
 				lst:toFront()
 
 			 end
